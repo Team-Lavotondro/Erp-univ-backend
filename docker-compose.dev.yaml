@@ -1,0 +1,55 @@
+services:
+
+  backend:
+    build:
+    context: .
+    image: erp:v0-dev
+    container_name: erp-backend
+    networks:
+      - erp_network
+    ports:
+    - "3000:3000"
+    volumes:
+    - .:/app
+    - /app/node_modules
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: erp_db
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+    - postgres
+    - rabbitmq
+
+  postgres:
+    image: postgres:17
+    container_name: erp-postgres
+    networks:
+      - erp_network
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: erp_db
+    ports:
+    - "5432:5432"
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: erp-rabbitmq
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    networks:
+      - erp_network
+    
+volumes:
+postgres_data:
+
+networks:
+  erp_network:
+    external: true
